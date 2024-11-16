@@ -2,7 +2,6 @@ pipeline {
     agent any
     
     tools {
-        maven 'Maven 3.8.6'
         jdk 'JDK 17'
     }
     
@@ -12,7 +11,10 @@ pipeline {
         APP_PORT = '8080'
         CONTAINER_NAME = 'java-application'
         GITHUB_REPO = 'https://github.com/DevandMlOps/devops.git'
-        JAVA_HOME = tool 'JDK 17'
+        // Actualizado con las rutas correctas verificadas
+        JAVA_HOME = '/usr/lib/jvm/java-17-openjdk-amd64'
+        M2_HOME = '/usr/local/maven/apache-maven-3.9.9'
+        PATH = "${env.M2_HOME}/bin:${env.JAVA_HOME}/bin:${env.PATH}"
     }
     
     stages {
@@ -26,23 +28,16 @@ pipeline {
         
         stage('Build') {
             steps {
-                withEnv(["PATH+JAVA=${env.JAVA_HOME}/bin"]) {
-                    dir('java-app') {
-                        sh 'echo $JAVA_HOME'
-                        sh 'which java'
-                        sh 'java -version'
-                        sh 'mvn clean package'
-                    }
+                dir('java-app') {
+                    sh 'mvn clean package'
                 }
             }
         }
         
         stage('Test') {
             steps {
-                withEnv(["PATH+JAVA=${env.JAVA_HOME}/bin"]) {
-                    dir('java-app') {
-                        sh 'mvn test'
-                    }
+                dir('java-app') {
+                    sh 'mvn test'
                 }
             }
             post {
