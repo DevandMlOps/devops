@@ -11,24 +11,33 @@ pipeline {
         DOCKER_TAG = 'latest'
         APP_PORT = '8080'
         CONTAINER_NAME = 'java-application'
+        GITHUB_REPO = 'https://github.com/DevandMlOps/devops.git'
     }
     
     stages {
         stage('Checkout') {
             steps {
-                checkout scm
+                // Limpiamos el workspace antes de clonar
+                cleanWs()
+                // Clonamos el repositorio específico
+                git branch: 'main',
+                    url: env.GITHUB_REPO
             }
         }
         
         stage('Build') {
             steps {
-                sh 'mvn clean package'
+                dir('java-app') {  // Asumiendo que el código está en el directorio java-app
+                    sh 'mvn clean package'
+                }
             }
         }
         
         stage('Test') {
             steps {
-                sh 'mvn test'
+                dir('java-app') {
+                    sh 'mvn test'
+                }
             }
             post {
                 always {
@@ -39,8 +48,10 @@ pipeline {
         
         stage('Build Docker Image') {
             steps {
-                script {
-                    sh "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
+                dir('java-app') {
+                    script {
+                        sh "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
+                    }
                 }
             }
         }
