@@ -12,14 +12,13 @@ pipeline {
         APP_PORT = '8080'
         CONTAINER_NAME = 'java-application'
         GITHUB_REPO = 'https://github.com/DevandMlOps/devops.git'
+        JAVA_HOME = tool 'JDK 17'
     }
     
     stages {
         stage('Checkout') {
             steps {
-                // Limpiamos el workspace antes de clonar
                 cleanWs()
-                // Clonamos el repositorio específico
                 git branch: 'main',
                     url: env.GITHUB_REPO
             }
@@ -27,16 +26,23 @@ pipeline {
         
         stage('Build') {
             steps {
-                dir('java-app') {  // Asumiendo que el código está en el directorio java-app
-                    sh 'mvn clean package'
+                withEnv(["PATH+JAVA=${env.JAVA_HOME}/bin"]) {
+                    dir('java-app') {
+                        sh 'echo $JAVA_HOME'
+                        sh 'which java'
+                        sh 'java -version'
+                        sh 'mvn clean package'
+                    }
                 }
             }
         }
         
         stage('Test') {
             steps {
-                dir('java-app') {
-                    sh 'mvn test'
+                withEnv(["PATH+JAVA=${env.JAVA_HOME}/bin"]) {
+                    dir('java-app') {
+                        sh 'mvn test'
+                    }
                 }
             }
             post {
