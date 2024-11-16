@@ -2,7 +2,9 @@ pipeline {
     agent any
     
     tools {
+        // Asegúrate de que estos nombres coincidan con los configurados en Jenkins Global Tool Configuration
         jdk 'JDK 17'
+        maven 'Maven 3.9.9'
     }
     
     environment {
@@ -11,10 +13,6 @@ pipeline {
         APP_PORT = '8080'
         CONTAINER_NAME = 'java-application'
         GITHUB_REPO = 'https://github.com/DevandMlOps/devops.git'
-        // Actualizado con las rutas correctas verificadas
-        JAVA_HOME = '/usr/lib/jvm/java-17-openjdk-amd64'
-        M2_HOME = '/usr/local/maven/apache-maven-3.9.9'
-        PATH = "${env.M2_HOME}/bin:${env.JAVA_HOME}/bin:${env.PATH}"
     }
     
     stages {
@@ -23,6 +21,19 @@ pipeline {
                 cleanWs()
                 git branch: 'main',
                     url: env.GITHUB_REPO
+            }
+        }
+        
+        stage('Verify Tools') {
+            steps {
+                sh '''
+                    echo "Workspace directory:"
+                    pwd
+                    echo "Java version:"
+                    java -version
+                    echo "Maven version:"
+                    mvn -version
+                '''
             }
         }
         
