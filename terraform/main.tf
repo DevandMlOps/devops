@@ -22,7 +22,7 @@ resource "docker_container" "java_app" {
 
   ports {
     internal = 8080
-    external = 8080
+    external = 9090  # Cambiado de 8080 a 9090
   }
 
   restart = "unless-stopped"

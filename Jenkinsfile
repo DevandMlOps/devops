@@ -3,11 +3,11 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = 'java-health-app:latest'
-        APP_PORT = '8080'
+        APP_PORT = '9090'  // Usando puerto 9090 para evitar conflicto con Jenkins
     }
 
     tools {
-        maven 'Maven 3.9.9'  //las herramientas (Maven y JDK) deben estar configuradas con los mismos nombres que se usan en Jenkins
+        maven 'Maven 3.9.9'
         jdk 'JDK 17'
     }
 
@@ -15,7 +15,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 git branch: 'main',
-                    credentialsId: '49fc35f5-5797-44a8-b837-139ff6d2bf33', // Este ID debe coincidir con el configurado en Jenkins
+                    credentialsId: '49fc35f5-5797-44a8-b837-139ff6d2bf33',  // ID de las credenciales configuradas en Jenkins
                     url: 'https://github.com/DevandMlOps/devops.git'
             }
         }
@@ -42,6 +42,12 @@ pipeline {
                 script {
                     sh 'docker build -t ${DOCKER_IMAGE} .'
                 }
+            }
+        }
+
+        stage('Cleanup') {
+            steps {
+                sh 'docker rm -f java-health-app || true'
             }
         }
 
@@ -79,7 +85,6 @@ pipeline {
         }
         failure {
             echo 'El pipeline ha fallado'
-            // Aquí puedes añadir notificaciones en caso de fallo
         }
     }
 }
